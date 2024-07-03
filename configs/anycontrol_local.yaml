@@ -1,0 +1,150 @@
+model:
+  target: models.anycontrol.AnyControlNet
+  params:
+    linear_start: 0.00085
+    linear_end: 0.0120
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: "jpg"
+    cond_stage_key: "txt"
+    image_size: 64
+    channels: 4
+    cond_stage_trainable: false
+    conditioning_key: crossattn
+    monitor: val/loss_simple_ema
+    scale_factor: 0.18215
+    use_ema: False
+    mode: local
+
+    qformer_config:
+      target: models.q_formers.blip2_qformer.Blip2Qformer
+      model_name: "blip2"
+      model_type: "pretrain"
+      pretrained: "ckpts/blip2_pretrained.pth"
+      params:
+        img_size: 224
+        drop_path_rate: 0
+        use_grad_checkpoint: False
+        vit_precision: "fp16"
+        num_query_token: 256
+        max_txt_len: 32
+        query_token_init_type: "uniform"
+        max_position_embeddings: 512
+        multilevels: [3, 10, 17, 24, 31, 38]
+
+    local_control_config:
+      target: models.local_adapter.LocalAdapter
+      params:
+        in_channels: 4
+        model_channels: 320
+        local_channels: 3
+        inject_channels: [192, 256, 384, 512]
+        inject_layers: [1, 4, 7, 10]
+        query_channels: [768, 768, 768, 768]
+        query_layers: [4, 6, 8, 12]
+        query_scales: [4, 2, 1, 0.5] 
+        num_res_blocks: 2
+        attention_resolutions: [4, 2, 1]
+        channel_mult: [1, 2, 4, 4]
+        use_checkpoint: False
+        num_heads: 8
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 768
+        legacy: False
+
+    global_control_config:
+      target: models.global_adapter.GlobalAdapter
+      params:
+        cross_attention_dim: 768
+        clip_embeddings_dim: 768
+        context_tokens: 4
+        color_in_dim: 180
+
+    unet_config:
+      target: models.local_adapter.LocalControlUNetModel
+      params:
+        image_size: 32
+        in_channels: 4
+        model_channels: 320
+        out_channels: 4
+        num_res_blocks: 2
+        attention_resolutions: [4, 2, 1]
+        channel_mult: [1, 2, 4, 4]
+        use_checkpoint: False
+        num_heads: 8
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 768
+        legacy: False
+
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        embed_dim: 4
+        monitor: val/rec_loss
+        ddconfig:
+          double_z: true
+          z_channels: 4
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult:
+          - 1
+          - 2
+          - 4
+          - 4
+          num_res_blocks: 2
+          attn_resolutions: []
+          dropout: 0.0
+        lossconfig:
+          target: torch.nn.Identity
+
+    cond_stage_config:
+      target: ldm.modules.encoders.modules.FrozenCLIPEmbedder
+
+
+data:
+  target: src.train.dataset.CustomDataset
+  local_tasks: [canny, hed, depth, seg, openpose]
+  datasets: [multigen, coco, openimages]
+  json_files: 
+    multigen: "./datasets/MultiGen-20M/anycontrol_annotations.jsonl"
+    coco: "./datasets/MSCOCO/anycontrol_annotations.jsonl"
+    openimages: "./datasets/OpenImages/anycontrol_annotations.jsonl" 
+  params:
+    data_root:
+        multigen: ./datasets/MultiGen-20M
+        coco: ./datasets/MSCOCO
+        openimages: ./datasets/OpenImages
+    image_dir:
+        multigen: ./datasets/MultiGen-20M/images 
+        coco: ./datasets/MSCOCO/train2017
+        openimages: ./datasets/OpenImages/train
+    condition_root:
+        multigen: conditions
+        coco: conditions
+        openimages: conditions
+    resolution: 512
+    drop_txt_prob: 0.05
+    drop_all_prob: 0.05
+    keep_all_local_prob: 0.0
+    drop_all_local_prob: 0.0
+    drop_each_cond_prob: 
+      canny: 0.0
+      hed: 0.0
+      depth: 0.0
+      seg: 0.0
+      openpose: 0.0
+
+logger:
+    sample: false
+    N: 4
+    n_row: 4
+    ddim_steps: 50
+    ddim_eta: 0.0
+    plot_denoise_rows: false
+    plot_diffusion_rows: false
+    unconditional_guidance_scale: 7.5
