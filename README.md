@@ -89,7 +89,7 @@ python src/inference/gradio_demo.py
 
 We give a screenshot of the gradio demo. You can set the number of conditions you prefer to use dynamically, then upload the condition images and choose the processor for each conditon. We totally provide 4 spatial condition processors including `edge`, `depth`, `seg`, and `pose`. BTW, another two global control processors `content` and `color` are provided for your information, which are not part of this work.
 
-![](./assets/demo.png "AnyControl Gradio Demo")
+![](./assets/demo_00.jpg "AnyControl Gradio Demo")
 
 
 ## Training
