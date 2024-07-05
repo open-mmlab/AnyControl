@@ -1,5 +1,5 @@
 # [ECCV 2024] AnyControl: Create Your Artwork with Versatile Control on Text-to-Image Generation 
-[![arXiv](https://img.shields.io/badge/arXiv-2312.13964-b31b1b.svg)](https://arxiv.org/abs/2406.18958)
+[![arXiv](https://img.shields.io/badge/arXiv-2406.18958-b31b1b.svg)](https://arxiv.org/abs/2406.18958)
 [![Project Page](https://img.shields.io/badge/Project-Page-Green)](https://any-control.github.io/)
 [![HuggingFace Model](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-blue)](https://huggingface.co/nowsyn/anycontrol)
 <a target="_blank" href="https://huggingface.co/spaces/nowsyn/AnyControl">
