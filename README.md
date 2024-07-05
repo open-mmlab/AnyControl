@@ -26,7 +26,7 @@
 
 ## What's New<a name="news"></a>
 
-[2024/07/05] Online demo released in [HuggingFace]("https://huggingface.co/spaces/nowsyn/AnyControl").
+[2024/07/05] Online demo released in [HuggingFace](https://huggingface.co/spaces/nowsyn/AnyControl).
 
 [2024/07/03] :fire: AnyControl accepted by ECCV 2024!
 
